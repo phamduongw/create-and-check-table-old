@@ -1,0 +1,19 @@
+{
+    "fields": [
+      {
+        "aliases": [
+          "c22"
+        ],
+        "default": null,
+        "doc": "S",
+        "name": "CO_CODE",
+        "type": [
+          "null",
+          "string"
+        ]
+      }
+    ],
+    "name": "FBNK_SEAB_PAYMENT_PROVIDER",
+    "namespace": "vn.bnh.t24parser",
+    "type": "record"
+}
