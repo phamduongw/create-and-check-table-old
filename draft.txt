@@ -1,2 +1,6 @@
-kafka-topics --create --bootstrap-server 10.10.11.127:9092  --topic FLAT_SS-DEPT_ACCT_OFFICER --partitions 1
+kafka-topics --create --bootstrap-server 10.10.11.127:9092  --topic FLAT_SS-CATEG_ENTRY --partitions 1
 curl -X GET http://10.10.11.135:8081/subjects/FLAT_SS-DEPT_ACCT_OFFICER-value/versions/latest
+
+
+
+kafka-topics --create --bootstrap-server 10.10.11.127:9092 --topic FLAT_SS-CATEG_ENTRY --partitions 1
