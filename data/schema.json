@@ -1,19 +1,14 @@
 {
-    "fields": [
-      {
-        "aliases": [
-          "c22"
-        ],
-        "default": null,
-        "doc": "S",
-        "name": "EXCHANGE_RATE",
-        "type": [
-          "null",
-          "string"
-        ]
-      }
-    ],
-    "name": "FBNK_SEAB_PAYMENT_PROVIDER",
-    "namespace": "vn.bnh.t24parser",
-    "type": "record"
+  "fields": [
+    {
+      "aliases": ["c22"],
+      "default": null,
+      "doc": "S",
+      "name": "EXCHANGE_RATE",
+      "type": ["null", "string"]
+    }
+  ],
+  "name": "FBNK_SEAB_PAYMENT_PROVIDER",
+  "namespace": "vn.bnh.t24parser",
+  "type": "record"
 }

@@ -46,32 +46,46 @@ def get_stream_flow(ods_stream):
 
 # Stream 1
 def create_statement_of_stream_1():
+    CDC_FILE = "0.1.FBNK_{TABLE_NAME}_v0.1.sql"
+    INIT_FILE = "0.1.INIT_FBNK_{TABLE_NAME}_v0.1.sql"
+
     write_to_file(
-        os.environ["CDC_STREAM_1_PATH"],
-        read_file_content("template/cdc_1.txt").replace(
-            "{TABLE_NAME}", os.environ["TABLE_NAME"]
+        "{}/{}".format(os.environ["INIT_STREAM_FOLDER"], INIT_FILE).replace(
+            "{TABLE_NAME}", TABLE_NAME
+        ),
+        read_file_content("template/stream/{}".format(INIT_FILE)).replace(
+            "{TABLE_NAME}", TABLE_NAME
         ),
     )
     write_to_file(
-        os.environ["INIT_STREAM_1_PATH"],
-        read_file_content("template/init_1.txt").replace(
-            "{TABLE_NAME}", os.environ["TABLE_NAME"]
+        "{}/{}".format(os.environ["CDC_STREAM_FOLDER"], CDC_FILE).replace(
+            "{TABLE_NAME}", TABLE_NAME
+        ),
+        read_file_content("template/stream/{}".format(CDC_FILE)).replace(
+            "{TABLE_NAME}", TABLE_NAME
         ),
     )
 
 
 # Stream 2
 def create_statement_of_stream_2():
+    CDC_FILE = "0.2.FBNK_{TABLE_NAME}_MAPPED_v0.1.sql"
+    INIT_FILE = "0.2.INIT_FBNK_{TABLE_NAME}_MAPPED_v0.1.sql"
+
     write_to_file(
-        os.environ["CDC_STREAM_2_PATH"],
-        read_file_content("template/cdc_2.txt").replace(
-            "{TABLE_NAME}", os.environ["TABLE_NAME"]
+        "{}/{}".format(os.environ["INIT_STREAM_FOLDER"], INIT_FILE).replace(
+            "{TABLE_NAME}", TABLE_NAME
+        ),
+        read_file_content("template/stream/{}".format(INIT_FILE)).replace(
+            "{TABLE_NAME}", TABLE_NAME
         ),
     )
     write_to_file(
-        os.environ["INIT_STREAM_2_PATH"],
-        read_file_content("template/init_2.txt").replace(
-            "{TABLE_NAME}", os.environ["TABLE_NAME"]
+        "{}/{}".format(os.environ["CDC_STREAM_FOLDER"], CDC_FILE).replace(
+            "{TABLE_NAME}", TABLE_NAME
+        ),
+        read_file_content("template/stream/{}".format(CDC_FILE)).replace(
+            "{TABLE_NAME}", TABLE_NAME
         ),
     )
 
@@ -100,6 +114,9 @@ def get_field_names_of_statement(statement):
 
 
 def get_statement_of_stream_3(stream_name):
+    CDC_FILE = "0.3.ODS_{TABLE_NAME}_v0.1.sql"
+    INIT_FILE = "0.3.INIT_ODS_{TABLE_NAME}_v0.1.sql"
+
     for stream_info in ALL_STREAMS_AND_TOPICS:
         if stream_info["name"] == stream_name:
             field_names_raw = get_field_names_of_statement(stream_info["statement"])
@@ -109,33 +126,24 @@ def get_statement_of_stream_3(stream_name):
             )
 
             write_to_file(
-                os.environ["CDC_STREAM_3_PATH"],
-                read_file_content("template/cdc_3.txt")
+                "{}/{}".format(os.environ["INIT_STREAM_FOLDER"], INIT_FILE).replace(
+                    "{TABLE_NAME}", TABLE_NAME
+                ),
+                read_file_content("template/stream/{}".format(INIT_FILE))
                 .replace("{TABLE_NAME}", os.environ["TABLE_NAME"])
                 .replace("{FIELD_NAMES}", field_names.encode("utf-8")),
             )
             write_to_file(
-                os.environ["INIT_STREAM_3_PATH"],
-                read_file_content("template/init_3.txt")
+                "{}/{}".format(os.environ["CDC_STREAM_FOLDER"], CDC_FILE).replace(
+                    "{TABLE_NAME}", TABLE_NAME
+                ),
+                read_file_content("template/stream/{}".format(CDC_FILE))
                 .replace("{TABLE_NAME}", os.environ["TABLE_NAME"])
                 .replace("{FIELD_NAMES}", field_names.encode("utf-8")),
             )
 
 
 def create_statement_of_stream_3(ods_stream):
-    # ALL_STREAMS_AND_TOPICS
-    global ALL_STREAMS_AND_TOPICS
-    ALL_STREAMS_AND_TOPICS = get_all_streams_and_topics()
-
-    # SCHEMA
-    global SCHEMA
-    with open("data/schema.json", "r") as file:
-        SCHEMA = [field["name"] for field in json.load(file)["fields"]]
-
-    # REGEX PATTERN
-    global PATTERN
-    PATTERN = re.compile(r".+XMLRECORD\['(.+)'\].*\s(\w+),?")
-
     stream_flow = get_stream_flow("ODS_{}".format(ods_stream.strip()))[::-1]
 
     for stream_name in stream_flow:
@@ -151,6 +159,23 @@ def create_statement_of_stream_3(ods_stream):
 
 
 def create_stream(ods_stream):
+    # ALL_STREAMS_AND_TOPICS
+    global ALL_STREAMS_AND_TOPICS
+    ALL_STREAMS_AND_TOPICS = get_all_streams_and_topics()
+
+    # TABLE NAME
+    global TABLE_NAME
+    TABLE_NAME = os.environ["TABLE_NAME"]
+
+    # SCHEMA
+    global SCHEMA
+    with open("data/schema.json", "r") as file:
+        SCHEMA = [field["name"] for field in json.load(file)["fields"]]
+
+    # REGEX PATTERN
+    global PATTERN
+    PATTERN = re.compile(r".+XMLRECORD\['(.+)'\].*\s(\w+),?")
+
     create_statement_of_stream_1()
     create_statement_of_stream_2()
     create_statement_of_stream_3(ods_stream)
