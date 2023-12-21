@@ -1,7 +1,7 @@
 import os
 import re
 import json
-from services import list_streams_extended
+from services import list_streams_extended, get_schema_by_table_name
 from utils import write_to_file, read_file_content
 
 
@@ -108,7 +108,9 @@ def get_field_names_of_statement(statement):
     for field_name in statement.split("\n"):
         if "DATA.XMLRECORD" in field_name:
             field_names.append(
-                field_name.strip() + check_field_name_in_schema(field_name, SCHEMA)
+                # Except schema
+                # field_name.strip() + check_field_name_in_schema(field_name, SCHEMA)
+                field_name.strip()
             )
     return field_names
 
@@ -149,13 +151,13 @@ def create_statement_of_stream_3(ods_stream):
     for stream_name in stream_flow:
         if len(stream_flow) == 1:
             print("-- {}\n{}\n".format(stream_name, "ERROR!"))
-            break
+            return False
         if "ETL" in stream_name:
             get_statement_of_stream_3(stream_name)
-            break
+            return True
         if "ODS" in stream_name:
             get_statement_of_stream_3(stream_name)
-            break
+            return True
 
 
 def create_stream(ods_stream):
@@ -176,6 +178,16 @@ def create_stream(ods_stream):
     global PATTERN
     PATTERN = re.compile(r".+XMLRECORD\['(.+)'\].*\s(\w+),?")
 
-    create_statement_of_stream_1()
-    create_statement_of_stream_2()
-    create_statement_of_stream_3(ods_stream)
+    # Get schema by table name
+    # write_to_file("data/schema.json", get_schema_by_table_name(TABLE_NAME))
+
+    
+    status = create_statement_of_stream_3(ods_stream)
+    if status:
+        create_statement_of_stream_1()
+        create_statement_of_stream_2()
+        return True
+    else:
+        return False
+    
+    

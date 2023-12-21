@@ -21,8 +21,8 @@ def list_streams_extended():
 
 
 def get_schema_by_table_name(table_name):
-    command = "curl '{}/subjects/FLAT_SS-{}-value/versions/latest'".format(
+    command = "curl '{}/subjects/T24SS_{}-value/versions/latest'".format(
         os.environ["CONTROL_CENTER_URL"], table_name
     )
     response = os.popen(command).read()
-    return json.loads(response)
+    return json.loads(response)["schema"]
