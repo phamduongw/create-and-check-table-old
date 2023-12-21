@@ -1,7 +1,7 @@
 import os
 import re
 import json
-from ksqldb_services import list_streams_extended
+from services import list_streams_extended
 from utils import write_to_file, read_file_content
 
 
