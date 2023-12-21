@@ -6,7 +6,7 @@
         ],
         "default": null,
         "doc": "S",
-        "name": "CO_CODE",
+        "name": "EXCHANGE_RATE",
         "type": [
           "null",
           "string"

@@ -1,4 +1,6 @@
 import os
+import re
+import json
 from ksqldb_services import list_streams_extended
 from utils import write_to_file, read_file_content
 
@@ -42,6 +44,7 @@ def get_stream_flow(ods_stream):
     return stream_flow
 
 
+# Stream 1
 def create_statement_of_stream_1():
     write_to_file(
         os.environ["CDC_STREAM_1_PATH"],
@@ -57,6 +60,7 @@ def create_statement_of_stream_1():
     )
 
 
+# Stream 2
 def create_statement_of_stream_2():
     write_to_file(
         os.environ["CDC_STREAM_2_PATH"],
@@ -72,40 +76,78 @@ def create_statement_of_stream_2():
     )
 
 
-def get_statement_of_stream_3(is_exist, stream_name):
-    if is_exist:
-        for stream_info in ALL_STREAMS_AND_TOPICS:
-            if stream_info["name"] == stream_name:
-                write_to_file(os.environ["CDC_STREAM_3_PATH"], stream_info["statement"])
-                write_to_file(
-                    os.environ["INIT_STREAM_3_PATH"], stream_info["statement"]
-                )
+# Stream 3
+def check_field_name_in_schema(field_name, schema):
+    match = PATTERN.match(field_name)
+    if match:
+        group1, group2 = match.group(1), match.group(2)
+
+        return " -- XMLRECORD['{0}'] = {1} -- FIELD['{2}'] = {3}".format(
+            group1, group1 in schema, group2, group2 in schema
+        )
     else:
-        print("-- {}\n{}\n\n".format(stream_name, "ERROR!"))
+        print("Match failed.\n")
+
+
+def get_field_names_of_statement(statement):
+    field_names = []
+    for field_name in statement.split("\n"):
+        if "DATA.XMLRECORD" in field_name:
+            field_names.append(
+                field_name.strip() + check_field_name_in_schema(field_name, SCHEMA)
+            )
+    return field_names
+
+
+def get_statement_of_stream_3(stream_name):
+    for stream_info in ALL_STREAMS_AND_TOPICS:
+        if stream_info["name"] == stream_name:
+            field_names_raw = get_field_names_of_statement(stream_info["statement"])
+
+            field_names = "\n".join(
+                "\t" + field_name.decode("utf-8") for field_name in field_names_raw
+            )
+
+            write_to_file(
+                os.environ["CDC_STREAM_3_PATH"],
+                read_file_content("template/cdc_3.txt")
+                .replace("{TABLE_NAME}", os.environ["TABLE_NAME"])
+                .replace("{FIELD_NAMES}", field_names.encode("utf-8")),
+            )
+            write_to_file(
+                os.environ["INIT_STREAM_3_PATH"],
+                read_file_content("template/init_3.txt")
+                .replace("{TABLE_NAME}", os.environ["TABLE_NAME"])
+                .replace("{FIELD_NAMES}", field_names.encode("utf-8")),
+            )
 
 
 def create_statement_of_stream_3(ods_stream):
+    # ALL_STREAMS_AND_TOPICS
     global ALL_STREAMS_AND_TOPICS
     ALL_STREAMS_AND_TOPICS = get_all_streams_and_topics()
+
+    # SCHEMA
+    global SCHEMA
+    with open("data/schema.json", "r") as file:
+        SCHEMA = [field["name"] for field in json.load(file)["fields"]]
+
+    # REGEX PATTERN
+    global PATTERN
+    PATTERN = re.compile(r".+XMLRECORD\['(.+)'\].*\s(\w+),?")
+
     stream_flow = get_stream_flow("ODS_{}".format(ods_stream.strip()))[::-1]
+
     for stream_name in stream_flow:
         if len(stream_flow) == 1:
-            get_statement_of_stream_3(False, stream_name)
+            print("-- {}\n{}\n".format(stream_name, "ERROR!"))
             break
-
         if "ETL" in stream_name:
-            get_statement_of_stream_3(True, stream_name)
+            get_statement_of_stream_3(stream_name)
             break
-
         if "ODS" in stream_name:
-            get_statement_of_stream_3(True, stream_name)
+            get_statement_of_stream_3(stream_name)
             break
-
-    field_name = []
-    cdc_3 = read_file_content(os.environ["CDC_STREAM_3_PATH"]).split("\n")
-    for line in cdc_3:
-        if "DATA.XMLRECORD" in line:
-            field_name.append(line.strip())
 
 
 def create_stream(ods_stream):

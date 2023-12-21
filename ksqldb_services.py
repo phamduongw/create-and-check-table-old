@@ -17,7 +17,5 @@ def list_streams_extended():
             os.environ.get("KSQLDB_USERNAME"), os.environ.get("KSQLDB_PASSWORD")
         ),
     )
-
     response = os.popen(command).read()
-
     return json.loads(response)
