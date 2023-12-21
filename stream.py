@@ -43,10 +43,6 @@ def get_stream_flow(ods_stream):
 
 
 def create_statement_of_stream_1():
-    print(
-        os.environ["CDC_STREAM_1_PATH"],
-    )
-
     write_to_file(
         os.environ["CDC_STREAM_1_PATH"],
         read_file_content("template/cdc_1.txt").replace(
@@ -110,9 +106,6 @@ def create_statement_of_stream_3(ods_stream):
     for line in cdc_3:
         if "DATA.XMLRECORD" in line:
             field_name.append(line.strip())
-
-    print(field_name)
-    print(len(field_name))
 
 
 def create_stream(ods_stream):

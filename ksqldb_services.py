@@ -1,14 +1,7 @@
 import os
 import json
 
-from utils import read_env_file, getBase64Credentials
-
-read_env_file()
-
-KSQLDB_URL = os.environ.get("KSQLDB_URL")
-BASE64_CREDENTIALS = getBase64Credentials(
-    os.environ.get("KSQLDB_USERNAME"), os.environ.get("KSQLDB_PASSWORD")
-)
+from utils import getBase64Credentials
 
 
 def list_streams_extended():
@@ -19,7 +12,10 @@ def list_streams_extended():
     --data '{{
         "ksql": "LIST STREAMS EXTENDED;"
     }}'""".format(
-        KSQLDB_URL, BASE64_CREDENTIALS
+        os.environ.get("KSQLDB_URL"),
+        getBase64Credentials(
+            os.environ.get("KSQLDB_USERNAME"), os.environ.get("KSQLDB_PASSWORD")
+        ),
     )
 
     response = os.popen(command).read()

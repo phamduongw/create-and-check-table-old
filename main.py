@@ -12,13 +12,13 @@ def main():
     table_index = "{:02d}".format(raw_index)
     table_name = read_file_content("data/table_name.txt").strip()
 
-    write_to_file(
-        ".env",
-        read_file_content("template/env.txt")
+    env_file_content = (
+        read_file_content(".env")
         .replace("{INDEX}", table_index)
-        .replace("{TABLE_NAME}", table_name),
+        .replace("{TABLE_NAME}", table_name)
+        .split("\n")
     )
-    read_env_file()
+    read_env_file(env_file_content)
 
     create_stream(table_name)
 

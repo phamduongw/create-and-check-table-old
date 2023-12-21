@@ -18,12 +18,11 @@ def write_to_file(path, content):
         file.write(content)
 
 
-def read_env_file():
-    with open(".env", "r") as file:
-        for line in file:
-            if line.strip() and not line.startswith("#"):
-                key, value = line.strip().split("=", 1)
-                os.environ[key] = value
+def read_env_file(file):
+    for line in file:
+        if line and not line.startswith("#"):
+            key, value = line.strip().split("=", 1)
+            os.environ[key] = value
 
 
 def getBase64Credentials(username, password):
